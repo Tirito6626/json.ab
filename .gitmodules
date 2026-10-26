@@ -1,0 +1,4 @@
+[submodule "shelljq"]
+	path = shelljq
+	url = https://github.com/Tirito6626/shelljq
+	branch = nightly

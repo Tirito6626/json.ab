@@ -1,0 +1,105 @@
+import { echo_error } from "std/env"
+import { join } from "std/text"
+
+fun throw_error(func: Text): Null? {
+    const error = "";
+    trust $ {nameof(error)}="\$_shjq_error" $
+    echo_error("{func} exited with error: {error}")
+    fail(1)
+}
+
+pub fun load_shelljq(path: Text): Null? {
+    $ source "{path}" $ failed {
+        echo_error("Failed to load shelljq ({path})", 1)
+        fail(1)
+    }
+}
+
+/// Trim JSON. Set `validate` to `false` for the best performance
+pub fun json_trim(input: Text, validate: Bool = false): Text? {
+    const result = "";
+    if len(input) == 0:
+        echo_error("No input provided", 1)
+    
+    $ json_trim "{input}" "{validate}" true $ failed {
+        throw_error("json_trim")?
+    }
+    trust $ {nameof(result)}="\$json_trim_output" $
+    return result
+}
+
+/// Initialize internal JSON parser
+///
+/// Set `raw` to `false` to preserve quotes and escaped sequences
+pub fun json_parser(input: Text, raw: Bool = false): Null? {
+    if len(input) == 0:
+        echo_error("No input provided", 1)
+    
+    input = json_trim(input, true)?
+    $ json_to_arr "{input}" "" "{raw}" $ failed {
+        throw_error("json_to_arr")?
+    }
+}
+
+/// Perform a single JSON query
+pub fun json_query(query: Text, raw: Bool = false): Text? {
+    const result = "";
+    if len(query) == 0:
+        echo_error("No query provided", 1)
+    
+    $ json_query "{query}" "{raw}" $ failed {
+        throw_error("json_query")?
+    }
+
+    trust $ {nameof(result)}="\$json_query_output" $
+
+    return result
+}
+
+/// Perform multiple JSON queries and return as an array
+pub fun json_multiquery(query: [Text], raw: Bool = false): [Text]? {
+    const result = [Text];
+    if len(query) == 0:
+        echo_error("No query provided", 1)
+    
+    $ json_query "{join(query, " ")}" "{raw}" 1 $ failed {
+        throw_error("json_multiquery")?
+    }
+
+    trust $ {nameof(result)}=("\$\{json_query_output[@]}") $
+
+    return result
+}
+
+/// Transform child key array/object to root array. Useful when you only iterate over its child keys/don't need parent keys
+pub fun key_to_arr(key: Text, raw: Bool = false): Null? {
+    if len(key) == 0:
+        echo_error("No key provided", 1)
+
+    $ key_to_arr "{key}" "" "{raw}" $ failed {
+        throw_error("key_to_arr")?
+    }
+}
+
+/// Modify/append JSON key value/element
+/// If `key` includes [], `value` is added as an element to `key` array
+pub fun json_set(key: Text, value: Text): Null? {
+    if len(key) == 0:
+        echo_error("No key provided", 1)
+    if len(key) == 0:
+        echo_error("No value provided", 1)
+
+    $ json_set "{key}" "{value}" 1 $ failed {
+        throw_error("json_set")?
+    }
+}
+
+/// Remove JSON key/element
+pub fun json_remove(key: Text): Null? {
+    if len(key) == 0:
+        echo_error("No key provided", 1)
+
+    $ json_remove "{key}" 1 $ failed {
+        throw_error("json_remove")?
+    }
+}

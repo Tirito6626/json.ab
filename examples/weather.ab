@@ -1,0 +1,22 @@
+import { load_shelljq, json_parser, json_query, json_multiquery, key_to_arr } from "../main.ab"
+import { fetch } from "std/http"
+
+main (args) {
+    if len(args) < 2 {
+        echo("Expected city name as input")
+        exit(1)
+    }
+    const city = args[1];
+
+    load_shelljq("shelljq/shjq")?
+    const json = trust fetch("https://wttr.is/{city}?format=j2");
+
+    json_parser(json, true)?
+    key_to_arr("current_condition[0]", true)?
+    const [temp, humidity, pressure] = trust json_multiquery(["temp_C", "humidity", "pressure"])
+    
+    echo("Weather in {city}: " + trust json_query("weatherDesc[0].value"))
+    echo("Temperature: {temp}C")
+    echo("Humidity: {humidity}%")
+    echo("Air pressure: {pressure}psi")
+}

@@ -1,0 +1,23 @@
+import { load_shelljq, json_parser, json_query, json_multiquery, key_to_arr } from "../main.ab"
+import { fetch } from "std/http"
+
+main (args) {
+    let ip = len(args) >= 2 then args[1] else "";
+
+    load_shelljq("shelljq/shjq")?
+    const json = fetch("https://ipinfo.io/{ip}")?;
+
+    json_parser(json, true)?
+    const [
+        hostname, 
+        city, 
+        region, 
+        country, 
+        asn
+    ] = json_multiquery(["hostname", "city", "region", "country", "org"])?
+    if ip == "":
+        ip = json_query("ip")?;
+    echo("{ip} ({hostname})")
+    echo("Location: {city}, {region} ({country})")
+    echo("ASN: {asn}")
+}
